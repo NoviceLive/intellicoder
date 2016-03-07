@@ -85,7 +85,7 @@ class Converter(object):
 
     def to_bytes(self):
         """Convert to bytes."""
-        return unhexlify(self.stream)
+        return unhexlify(self.stream.encode('utf-8'))
 
     def to_esc(self):
         """Convert to escape string."""
