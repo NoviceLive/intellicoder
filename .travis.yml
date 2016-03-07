@@ -16,7 +16,7 @@ python:
   - "pypy3"
 
 install:
-  - pip install -r requirements.txt
+  - python setup.py install
   - pip install -r requirements3.txt
 
 script: nosetests

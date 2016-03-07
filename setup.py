@@ -21,7 +21,7 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division, absolute_import, print_function
 from sys import version_info
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 __author__ = 'Gu Zhengxiong'
@@ -44,7 +44,7 @@ with open('requirements.txt') as deps:
 setup(
     name=PROGRAM_NAME,
     version=__version__,
-    packages=[PACKAGE_NAME],
+    packages=find_packages(),
     install_requires=common_deps,
     include_package_data=True,
     entry_points={
