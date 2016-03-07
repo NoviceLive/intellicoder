@@ -1,0 +1,8 @@
+click
+colorama
+flufl.i18n
+six
+more-itertools
+python-magic
+pyelftools
+pefile
