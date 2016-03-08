@@ -4,13 +4,20 @@ from intellicoder import Database
 from intellicoder.database import Item
 
 
-path = 'ignored/test.db'
-os.makedirs(os.path.dirname(path), exist_ok=True)
+path = 'ignored'
+name = os.path.join(path, 'test.db')
+if os.path.exists(path):
+    pass
+else:
+    try:
+        os.makedirs(path)
+    except:
+        pass
 try:
     os.remove(path)
 except:
     pass
-db = Database(path)
+db = Database(name)
 with open('tests/syscall_32.tbl') as tbl32, \
      open('tests/syscall_64.tbl') as tbl64, \
      open('tests/allsc.txt') as allsc:
