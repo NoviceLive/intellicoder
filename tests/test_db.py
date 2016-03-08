@@ -5,7 +5,7 @@ from intellicoder.database import Item
 
 
 path = 'ignored/test.db'
-os.makedirs(os.path.dirname(path), exists_ok=True)
+os.makedirs(os.path.dirname(path), exist_ok=True)
 try:
     os.remove(path)
 except:
