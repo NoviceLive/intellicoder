@@ -30,6 +30,7 @@ from colorama import init
 
 from .converters import Converter
 from .executables import Executable
+from .database import Database
 
 
 __all__ = ['Converter', 'Executable']

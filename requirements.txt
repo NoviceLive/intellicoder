@@ -7,3 +7,4 @@ fn
 python-magic
 pyelftools
 pefile
+sqlalchemy

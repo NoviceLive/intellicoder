@@ -9,4 +9,5 @@
 targets=(./setup.py ./ic.py ./intellicoder)
 
 
-pylint "${targets[@]}" --disable=wrong-import-position,invalid-name,too-few-public-methods
+pylint "${targets[@]}" \
+       --disable=wrong-import-position,invalid-name,too-few-public-methods,bad-builtin,missing-docstring

@@ -27,6 +27,8 @@ import click
 from . import VERSION_PROMPT, PROGRAM_NAME
 from .i18n import _
 from .converters import Converter
+from .database import Database
+from .utils import expand_path
 
 
 @click.group(
@@ -35,8 +37,11 @@ from .converters import Converter
                       '-V', '--version', prog_name=PROGRAM_NAME)
 @click.option('-v', '--verbose', count=True, help='Be verbose.')
 @click.option('-q', '--quiet', count=True, help='Be quiet.')
+@click.option('-d', '--database', type=click.Path(),
+              default=expand_path('data', 'default.db'),
+              help='Connect the database.')
 @click.pass_context
-def cli(context, verbose, quiet):
+def cli(context, verbose, quiet, **kwargs):
     """
     IntelliCoder.
     """
@@ -47,6 +52,63 @@ def cli(context, verbose, quiet):
     logger.setLevel(logging.WARNING + (quiet-verbose)*10)
     logging.debug(_('Invoked Subcommand: %s'),
                   context.invoked_subcommand)
+    database = Database(kwargs['database'])
+    context.obj['database'] = database
+
+
+@cli.command()
+@click.argument('filenames', nargs=-1, required=True,
+                type=click.File())
+@click.pass_context
+def add(context, filenames):
+    """
+    Add data on Linux system calls.
+
+    Arguments shall be *.tbl files or output from grep.
+
+    Delete the old database before adding if necessary.
+    """
+    logging.info(_('Current Mode: Add Linux data'))
+    context.obj['database'].add_data(filenames)
+    sys.exit(0)
+
+
+@cli.command()
+@click.argument('keywords', nargs=-1, required=True)
+@click.option('-3', '--x86', is_flag=True)
+@click.option('-6', '--x64', is_flag=True)
+@click.option('-c', '--common', is_flag=True)
+@click.option('-x', '--x32', is_flag=True)
+@click.pass_context
+def find(context, keywords, x86, x64, x32, common):
+    """
+    Find in the Linux system calls.
+    """
+    logging.info(_('Current Mode: Find in Linux'))
+    database = context.obj['database']
+    for one in keywords:
+        abis = ['i386', 'x64', 'common', 'x32']
+        if x86:
+            abis = ['i386']
+        if x64:
+            abis = ['x64', 'common']
+        if x32:
+            abis = ['x32', 'common']
+        if common:
+            abis = ['common']
+        items = database.query_item(one, abis)
+        if not items:
+            logging.warning(_('Item not found: %s %s'), one, abis)
+            continue
+        for item in items:
+            print(item.name, item.abi, item.number)
+            decl = database.query_decl(name=item.name)
+            if not decl:
+                logging.warning(_('Decl not found: %s'), item.name)
+                continue
+            for one in decl:
+                print(one.decl(), '/* {} */'.format(one.filename))
+    sys.exit(0)
 
 
 @cli.command()
@@ -85,7 +147,7 @@ def conv(arg, source, target, filename, section):
         if filename:
             logging.info(
                 _('Writing shellcode to the file: %s'), filename)
-            mode = 'wb' if to == 'bin' else 'w'
+            mode = 'wb' if target == 'bin' else 'w'
             with open(filename, mode) as output:
                 output.write(result)
         else:

@@ -20,11 +20,37 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import division, absolute_import, print_function
 from logging import getLogger
+import os
+import sys
 
 from .i18n import _
 
 
 logging = getLogger(__name__)
+
+
+def expand_path(*paths):
+    """
+    Expand the path with the directory of the executed file.
+    """
+    return os.path.join(
+        os.path.dirname(os.path.realpath(sys.argv[0])),
+        *paths
+    )
+
+
+def expand_user(*paths):
+    """
+    Wrap the os.path.expanduser to make life easier.
+    """
+    return os.path.expanduser(os.path.join('~', *paths))
+
+
+def remove_false(iterable):
+    """
+    Remove False value from the iterable.
+    """
+    return filter(bool, iterable)
 
 
 class AttrsGetter(object):
