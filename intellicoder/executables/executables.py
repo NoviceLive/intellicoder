@@ -39,7 +39,9 @@ class Executable(object):
         self.mime = magic_from_file(stream.name, mime=True)
         logging.debug(_('MIME type: %s'), self.mime)
 
-        if self.mime == b'application/x-executable':
+        if self.mime in [
+                b'application/x-executable',
+                b'application/x-sharedlib']:
             self.binary = ELF(stream)
             self.system = 'linux'
             self.prefix = 'elf'

@@ -19,6 +19,7 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from logging import getLogger
+import sys
 
 try:
     from elftools.elf.elffile import ELFFile as ELFBackend
@@ -37,7 +38,8 @@ class ELF(object):
         try:
             self.binary = ELFBackend(stream)
         except NameError:
-            raise RuntimeError(_('Install pyelftools!'))
+            logging.critical(_('Install pyelftools!'))
+            sys.exit(1)
 
     def get_section_data(self, name):
         """Get the data of the section."""

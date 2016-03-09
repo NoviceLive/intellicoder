@@ -19,6 +19,7 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from logging import getLogger
+import sys
 
 try:
     from pefile import PE as PEBackend
@@ -36,7 +37,11 @@ logging = getLogger(__name__)
 class PE(object):
     """PE file."""
     def __init__(self, stream):
-        self.binary = PEBackend(stream.name)
+        try:
+            self.binary = PEBackend(stream.name)
+        except NameError:
+            logging.critical(_('Install pefile!'))
+            sys.exit(1)
 
     def get_section_data(self, name):
         """Get the data of the section."""
