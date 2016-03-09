@@ -3,3 +3,10 @@
 build
 dist
 ignored
+_src
+.gdb_history
+2NojKT
+*.o
+_32
+_64
+a.out
