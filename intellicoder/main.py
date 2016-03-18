@@ -80,7 +80,7 @@ def add(context, filenames):
 @click.option('-c', '--common', is_flag=True)
 @click.option('-x', '--x32', is_flag=True)
 @click.pass_context
-def find(context, keywords, x86, x64, x32, common):
+def info(context, keywords, x86, x64, x32, common):
     """
     Find in the Linux system calls.
     """

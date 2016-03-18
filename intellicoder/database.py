@@ -47,14 +47,17 @@ class Database(object):
         self.session = Session()
 
     def query_item(self, key, abis):
-        if key.isdigit():
+        try:
             key = int(key)
             field = 'number'
-        else:
-            field = 'name'
-        arg = and_(
-            getattr(Item, field) == key,
-            or_(Item.abi == abi for abi in abis))
+        except ValueError:
+            try:
+                key = int(key, 16)
+                field = 'number'
+            except ValueError:
+                field = 'name'
+        arg = and_(getattr(Item, field) == key,
+                   or_(Item.abi == abi for abi in abis))
         return self.session.query(Item).filter(arg).all()
 
     def query_decl(self, **kwargs):

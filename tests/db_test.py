@@ -37,13 +37,13 @@ def test_query_item():
         assert item.abi == 'common'
         assert item.number == 57
 
-        item = db.query_item('5', abis=['common'])[0]
+        item = db.query_item(0x32, abis=['common'])[0]
         print(item)
-        assert item.name == 'fstat'
+        assert item.name == 'listen'
         assert item.abi == 'common'
-        assert item.number == 5
+        assert item.number == 50
 
-        item = db.query_item('100', abis=['i386'])[0]
+        item = db.query_item('0x64', abis=['i386'])[0]
         print(item)
         assert item.name == 'fstatfs'
         assert item.abi == 'i386'
