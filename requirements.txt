@@ -4,7 +4,6 @@ flufl.i18n
 six
 more-itertools
 fn
-python-magic
-pyelftools
-pefile
 sqlalchemy
+pyelftools
+pecoff

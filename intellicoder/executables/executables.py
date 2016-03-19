@@ -19,11 +19,15 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from logging import getLogger
+from sys import platform
 
 try:
     from magic import from_file as magic_from_file
 except ImportError:
-    raise RuntimeError('sudo pip install python-magic')
+    if platform == 'win32':
+        from ..utils import ad_hoc_magic_from_file as magic_from_file
+    else:
+        raise RuntimeError('sudo pip install python-magic')
 
 from .elf import ELF
 from .pe import PE

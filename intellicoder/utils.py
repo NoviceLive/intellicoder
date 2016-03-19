@@ -29,42 +29,42 @@ from .i18n import _
 logging = getLogger(__name__)
 
 
+def ad_hoc_magic_from_file(filename, mime=True):
+    """Ad-hoc emulation of magic.from_file from python-magic."""
+    with open(filename, 'rb') as stream:
+        head = stream.read(16)
+        if head[:4] == b'\x7fELF':
+            return b'application/x-executable'
+        elif head[:2] == b'MZ':
+            return b'application/x-dosexec'
+        else:
+            raise NotImplementedError()
+
+
 def expand_path(*paths):
-    """
-    Expand the path with the directory of the executed file.
-    """
+    """Expand the path with the directory of the executed file."""
     return os.path.join(
-        os.path.dirname(os.path.realpath(sys.argv[0])),
-        *paths
-    )
+        os.path.dirname(os.path.realpath(sys.argv[0])), *paths)
 
 
 def expand_user(*paths):
-    """
-    Wrap the os.path.expanduser to make life easier.
-    """
+    """Wrap the os.path.expanduser to make life easier."""
     return os.path.expanduser(os.path.join('~', *paths))
 
 
 def remove_false(iterable):
-    """
-    Remove False value from the iterable.
-    """
+    """Remove False value from the iterable."""
     return filter(bool, iterable)
 
 
 class AttrsGetter(object):
-    """
-    Get attributes from objects.
-    """
+    """Get attributes from objects."""
     def __init__(self, objects, join=True):
         self.objects = objects
         self.join = join
 
     def __getattr__(self, name):
-        """
-        Get an attribute from multiple objects.
-        """
+        """Get an attribute from multiple objects."""
         logging.debug(_('name: %s'), name)
         attrs = [getattr(one, name) for one in self.objects]
         if isinstance(attrs[0], str) and self.join:
@@ -72,8 +72,6 @@ class AttrsGetter(object):
         return attrs
 
     def get_attrs(self, *names):
-        """
-        Get multiple attributes from multiple objects.
-        """
+        """Get multiple attributes from multiple objects."""
         attrs = [getattr(self, name) for name in names]
         return attrs
