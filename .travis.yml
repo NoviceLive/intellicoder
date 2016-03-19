@@ -16,6 +16,5 @@ python:
 
 install:
   - python setup.py install
-  - pip install -r requirements3.txt
 
 script: nosetests
