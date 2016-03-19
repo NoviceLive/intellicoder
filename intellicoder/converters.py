@@ -25,7 +25,7 @@ import codecs
 from more_itertools import chunked
 from fn import _ as X
 
-from .i18n import _
+from .init import _
 from .executables import Executable
 
 

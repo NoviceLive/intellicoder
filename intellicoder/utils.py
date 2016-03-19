@@ -20,13 +20,72 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import division, absolute_import, print_function
 from logging import getLogger
+from glob import glob
+from itertools import chain
 import os
 import sys
+import platform
+from subprocess import check_output
 
-from .i18n import _
+from .init import _
 
 
 logging = getLogger(__name__)
+
+
+def run_program(program, *args):
+    """Wrap subprocess.check_output to make life easier."""
+    real_args = [program]
+    real_args.extend(args)
+    logging.debug(_('check_output arguments: %s'), real_args)
+    check_output(real_args, universal_newlines=True)
+
+
+def read_file(filename):
+    """Read a file."""
+    logging.debug(_('Reading file: %s'), filename)
+    try:
+        with open(filename) as readable:
+            return readable.read()
+    except OSError:
+        logging.error(_('Error reading file: %s'), filename)
+        return ''
+
+
+def get_parent_dir(name):
+    """Get the parent directory of a filename."""
+    parent_dir = os.path.dirname(os.path.dirname(name))
+    if parent_dir:
+        return parent_dir
+    return os.path.abspath('.')
+
+
+def glob_many(names):
+    """Apply glob.glob to a list of filenames."""
+    return list(chain.from_iterable([glob(name) for name in names]))
+
+
+def is_64_bit():
+    """Determine whether the system is 64-bit of not."""
+    machine = platform.machine().lower()
+    return machine in ['x86_64', 'amd64']
+
+
+def is_windows():
+    """Determine whether the system is Windows or not."""
+    return sys.platform == 'win32'
+
+
+def replace_ext(filename, ext, basename=True):
+    """Replace the extension."""
+    return split_ext(filename, basename)[0] + ext
+
+
+def split_ext(path, basename=True):
+    """Wrap them to make life easier."""
+    if basename:
+        path = os.path.basename(path)
+    return os.path.splitext(path)
 
 
 def ad_hoc_magic_from_file(filename, mime=True):

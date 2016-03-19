@@ -26,7 +26,7 @@ try:
 except ImportError:
     pass
 
-from ..i18n import _
+from ..init import _
 
 
 logging = getLogger(__name__)

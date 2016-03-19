@@ -19,7 +19,6 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from __future__ import division, absolute_import, print_function
-from sys import version_info
 
 from setuptools import setup, find_packages
 
@@ -34,8 +33,6 @@ PACKAGE_NAME = 'intellicoder'
 
 with open('requirements.txt') as deps:
     common_deps = deps.read().splitlines()
-    # if version_info.major == 2:
-    #     common_deps.append('pefile')
 
 
 setup(
@@ -70,9 +67,3 @@ setup(
         'Programming Language :: Python :: 3.5',
     ]
 )
-
-
-# if version_info.major == 3:
-#     print('\n{0} WARNING: pefile IS NOT INSTALLED {0}'.format(
-#         '!' * 16), end='\n\n')
-#     print('You can install it by "pip install -r requirements3.txt"')

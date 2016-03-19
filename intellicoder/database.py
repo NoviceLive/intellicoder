@@ -28,7 +28,7 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import sessionmaker
 from more_itertools import chunked
 
-from .i18n import _
+from .init import _
 from .utils import remove_false
 
 

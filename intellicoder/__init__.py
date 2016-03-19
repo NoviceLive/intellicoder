@@ -26,8 +26,6 @@ except ImportError:
         def emit(self, record):
             pass
 
-from colorama import init
-
 from .converters import Converter
 from .executables import Executable
 from .database import Database
@@ -54,5 +52,3 @@ VERSION_PROMPT = (
 
 
 getLogger(__name__).addHandler(NullHandler())
-
-init(autoreset=True)

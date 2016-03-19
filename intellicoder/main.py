@@ -25,7 +25,7 @@ import logging
 import click
 
 from . import VERSION_PROMPT, PROGRAM_NAME
-from .i18n import _
+from .init import _, LevelFormatter
 from .converters import Converter
 from .database import Database
 from .utils import expand_path
@@ -61,8 +61,7 @@ def cli(context, verbose, quiet, **kwargs):
                 type=click.File())
 @click.pass_context
 def add(context, filenames):
-    """
-    Add data on Linux system calls.
+    """Add data on Linux system calls.
 
     Arguments shall be *.tbl files or output from grep.
 
@@ -74,6 +73,19 @@ def add(context, filenames):
 
 
 @cli.command()
+@click.argument('filenames', nargs=-1, required=True)
+@click.option('-6', '--x64', is_flag=True)
+def make(filenames, x64):
+    """Make binaries from sources.
+
+    Note that this is incomplete.
+    """
+    from .msbuild.builders import Builder
+    builder = Builder()
+    builder.build(list(filenames), x64=x64)
+
+
+@cli.command()
 @click.argument('keywords', nargs=-1, required=True)
 @click.option('-3', '--x86', is_flag=True)
 @click.option('-6', '--x64', is_flag=True)
@@ -81,8 +93,7 @@ def add(context, filenames):
 @click.option('-x', '--x32', is_flag=True)
 @click.pass_context
 def info(context, keywords, x86, x64, x32, common):
-    """
-    Find in the Linux system calls.
+    """Find in the Linux system calls.
     """
     logging.info(_('Current Mode: Find in Linux'))
     database = context.obj['database']
@@ -124,8 +135,7 @@ def info(context, keywords, x86, x64, x32, common):
 @click.option('-j', '--section', default='.pic', show_default=True,
               help='Use this section.')
 def conv(arg, source, target, filename, section):
-    """
-    Convert binary.
+    """Convert binary.
 
     Extract bytes in the given section from binary files
     and construct C source code
@@ -160,45 +170,5 @@ def conv(arg, source, target, filename, section):
 
 
 def main():
-    """
-    Start hacking the world.
-    """
+    """Start hacking the world."""
     cli(obj={})
-
-
-class LevelFormatter(logging.Formatter):
-    """
-    Logging formatter.
-    """
-    from colorama import Fore, Style
-
-    critical_formatter = logging.Formatter(
-        Fore.RED + Style.BRIGHT + 'critical: %(message)s')
-    error_formatter = logging.Formatter(
-        Fore.MAGENTA + Style.BRIGHT + 'error: %(message)s')
-    warning_formatter = logging.Formatter(
-        Fore.YELLOW + Style.BRIGHT + 'warning: %(message)s')
-    info_formatter = logging.Formatter(
-        Fore.CYAN + Style.BRIGHT + '%(message)s')
-    debug_formatter = logging.Formatter(
-        Fore.GREEN + Style.BRIGHT + 'debug: ' +
-        Fore.BLUE + '%(name)s.%(funcName)s: ' +
-        Fore.GREEN + Style.BRIGHT + '%(message)s')
-
-    def __init__(self):
-        logging.Formatter.__init__(self)
-
-    def format(self, record):
-        """
-        Format the record using the corresponding formatter.
-        """
-        if record.levelno == logging.DEBUG:
-            return self.debug_formatter.format(record)
-        if record.levelno == logging.INFO:
-            return self.info_formatter.format(record)
-        if record.levelno == logging.ERROR:
-            return self.error_formatter.format(record)
-        if record.levelno == logging.WARNING:
-            return self.warning_formatter.format(record)
-        if record.levelno == logging.CRITICAL:
-            return self.critical_formatter.format(record)

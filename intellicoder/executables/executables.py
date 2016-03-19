@@ -31,7 +31,7 @@ except ImportError:
 
 from .elf import ELF
 from .pe import PE
-from ..i18n import _
+from ..init import _
 
 
 logging = getLogger(__name__)

@@ -11,3 +11,5 @@ _32
 _64
 a.out
 src
+*.obj
+*.exe

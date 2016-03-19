@@ -27,7 +27,7 @@ try:
 except ImportError:
     PEFILE = False
 
-from ..i18n import _
+from ..init import _
 from ..utils import AttrsGetter
 
 
