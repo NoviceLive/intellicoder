@@ -16,7 +16,6 @@ Clone and run.
 
 - ``git clone --depth 1 https://github.com/NoviceLive/intellicoder.git``
 - ``pip install -r requirements.txt``
-- ``pip install -r requirements3.txt``
 - ``./ic.py --help``
 
 

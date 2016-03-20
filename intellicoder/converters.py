@@ -141,6 +141,7 @@ def encode_escape(orig):
     return encoder(orig)[0].decode('utf-8')
 
 
+# TODO: Use a static template, i.e., move out of Python code.
 def make_test_shellcode(data, system):
     """
     Construct C source code used for testing purposes

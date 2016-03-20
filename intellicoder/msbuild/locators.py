@@ -294,9 +294,12 @@ class VSPath(object):
             raise RuntimeError(_('failed to find the SDK version'))
         regex = r'(?<=\\Microsoft SDKs\\Windows\\).+?(?=")'
         try:
-            return re.search(regex, batch).group()
+            version = re.search(regex, batch).group()
         except AttributeError:
             return ''
+        else:
+            logging.debug(_('SDK version: %s'), version)
+            return version
 
 
     def get_sdk_dir(self):

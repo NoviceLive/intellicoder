@@ -75,14 +75,19 @@ def add(context, filenames):
 @cli.command()
 @click.argument('filenames', nargs=-1, required=True)
 @click.option('-6', '--x64', is_flag=True)
-def make(filenames, x64):
+@click.option('-c', '--cl-args')
+@click.option('-l', '--link-args')
+@click.option('-o', '--output')
+def make(filenames, x64, cl_args, link_args, output):
     """Make binaries from sources.
 
     Note that this is incomplete.
     """
-    from .msbuild.builders import Builder
+    from .msbuild import Builder
     builder = Builder()
-    builder.build(list(filenames), x64=x64)
+    builder.build(list(filenames), x64=x64,
+                  cl_args=cl_args, link_args=link_args,
+                  out_dir=output)
 
 
 @cli.command()

@@ -20,11 +20,12 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import division, absolute_import, print_function
 from logging import getLogger
-from glob import glob
-from itertools import chain
 import os
 import sys
+import string
 import platform
+from glob import glob
+from itertools import chain
 from subprocess import check_output
 
 from .init import _
@@ -33,6 +34,24 @@ from .init import _
 logging = getLogger(__name__)
 
 
+def get_printable(iterable):
+    """
+    Get printable characters from the specified string.
+    Note that str.isprintable() is not available in Python 2.
+    """
+    if iterable:
+        return ''.join(i for i in iterable if i in string.printable)
+    return ''
+
+
+def invert_dict(original):
+    """
+    Reverse a dictionary.
+    """
+    return {values: key for key, values in original.items()}
+
+
+# TODO: Use plumbum.
 def run_program(program, *args):
     """Wrap subprocess.check_output to make life easier."""
     real_args = [program]
@@ -88,7 +107,8 @@ def split_ext(path, basename=True):
     return os.path.splitext(path)
 
 
-def ad_hoc_magic_from_file(filename, mime=True):
+# TODO: Remove this probably.
+def ad_hoc_magic_from_file(filename, **kwargs):
     """Ad-hoc emulation of magic.from_file from python-magic."""
     with open(filename, 'rb') as stream:
         head = stream.read(16)

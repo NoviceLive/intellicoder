@@ -10,4 +10,4 @@ targets=(./setup.py ./ic.py ./intellicoder)
 
 
 pylint "${targets[@]}" \
-       --disable=wrong-import-position,invalid-name,too-few-public-methods,bad-builtin,missing-docstring
+       --disable=wrong-import-position,invalid-name,too-few-public-methods,bad-builtin,missing-docstring,redefined-variable-type,fixme,too-many-arguments
