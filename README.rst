@@ -1,8 +1,9 @@
 IntelliCoder
 ============
 
+Position independent programming for humans.
 
-Current State: Work in progress and **incomplete**.
+Current State: It's a pretotype.
 
 
 .. image:: https://travis-ci.org/NoviceLive/intellicoder.svg?branch=master
