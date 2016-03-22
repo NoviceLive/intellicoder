@@ -19,8 +19,8 @@ Clone and run.
 - ``./ic.py --help``
 
 
-Current Features
-================
+Usable Features
+===============
 
 
 Shellcode Extraction & Conversion

@@ -48,7 +48,10 @@ def with_formatter(formatter):
 
 def format_module_funcs(raw):
     """Format the function names in a module."""
-    return ' '.join(func[0] for func in raw)
+    if raw:
+        return ' '.join(func[0] for func in raw)
+    else:
+        return None
 
 
 def format_func(raw):

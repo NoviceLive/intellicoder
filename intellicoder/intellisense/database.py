@@ -246,7 +246,12 @@ class SenseWithExport(IntelliSense):
         """Query the module name of the specified function."""
         sql = 'select module from export where func = ?'
         logging.debug('%s %s', sql, (func,))
-        self.cursor.execute(sql, (func,))
+        try:
+            self.cursor.execute(sql, (func,))
+        except sqlite3.OperationalError:
+            logging.error(
+                _('Have you fully prepared Windows database?'))
+            return None
         module = self.cursor.fetchone()
         if module:
             return (module[0], func)
@@ -266,6 +271,11 @@ class SenseWithExport(IntelliSense):
         """Query the functions in the specified module."""
         sql = 'select func from export where module = ?'
         logging.debug('%s %s', sql, (module,))
-        self.cursor.execute(sql, (module,))
+        try:
+            self.cursor.execute(sql, (module,))
+        except sqlite3.OperationalError:
+            logging.error(
+                _('Have you fully prepared Windows database?'))
+            return None
         funcs = self.cursor.fetchall()
         return funcs

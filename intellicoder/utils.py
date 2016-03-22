@@ -220,7 +220,7 @@ def stylify_code(code):
             universal_newlines=True, input=code
         )
     except (OSError, CalledProcessError, TypeError):
-        logging.exception(_('failed to stylify code'))
+        logging.debug(_('failed to stylify code'))
         return code
     return output
 

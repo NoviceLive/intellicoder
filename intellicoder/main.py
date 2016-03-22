@@ -20,7 +20,9 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import division, absolute_import, print_function
 import sys
+import os
 import logging
+from collections import OrderedDict
 
 import click
 
@@ -28,7 +30,14 @@ from . import VERSION_PROMPT, PROGRAM_NAME
 from .init import _, LevelFormatter
 from .converters import Converter
 from .database import Database
-from .utils import expand_path
+from .intellisense.database import SenseWithExport
+from .transformers import WindowsTransformer, LinuxTransformer
+from .builders import LinuxBuilder
+from .synthesizers import Synthesizer
+from .utils import (
+    expand_path, is_windows, write_file, read_files, write_files,
+    stylify_code, stylify_files, get_parent_dir, print_if, split_ext,
+    vboxsf_to_windows)
 
 
 @click.group(
@@ -40,18 +49,229 @@ from .utils import expand_path
 @click.option('-d', '--database', type=click.Path(),
               default=expand_path('data', 'default.db'),
               help='Connect the database.')
+@click.option('-s', '--sense', type=click.Path(),
+              default=expand_path('ignored', 'default.db'),
+              help='Connect the IntelliSense database.')
 @click.pass_context
-def cli(context, verbose, quiet, **kwargs):
-    """IntelliCoder."""
+def cli(context, verbose, quiet, database, sense):
+    """Position Independent Programming For Humans."""
     logger = logging.getLogger()
     handler = logging.StreamHandler(sys.stderr)
     handler.setFormatter(LevelFormatter())
     logger.addHandler(handler)
     logger.setLevel(logging.WARNING + (quiet-verbose)*10)
-    logging.debug(_('Invoked Subcommand: %s'),
-                  context.invoked_subcommand)
-    database = Database(kwargs['database'])
-    context.obj['database'] = database
+    logging.debug(_('Subcommand: %s'), context.invoked_subcommand)
+    context.obj['database'] = Database(database)
+    context.obj['sense'] = SenseWithExport(sense).__enter__()
+
+
+@cli.command()
+@click.argument('filenames', nargs=-1, required=True)
+@click.option('-u', '--uri', help='Connect the RPC server.')
+@click.option('-c', '--cl-args', help='Pass arguments to cl.exe.')
+@click.option('-l', '--link-args',
+              help='Pass to arguments link.exe.')
+@click.option('-6', '--x64', is_flag=True, help='Use x64.')
+@click.option('-n', '--native', is_flag=True, help='Use native.')
+def build(filenames, uri, cl_args, link_args, x64, native):
+    """
+    Build.
+    """
+    logging.info(_('This is source file building mode.'))
+    logging.debug(_('filenames: %s'), filenames)
+    logging.debug(_('uri: %s'), uri)
+    logging.debug(_('cl_args: %s'), cl_args)
+    logging.debug(_('link_args: %s'), link_args)
+    logging.debug(_('native: %s'), native)
+    logging.debug(_('x64: %s'), x64)
+
+    if is_windows():
+        pass
+        # ret = msbuild(uri, native, list(filenames), x64=x64,
+        #               cl_args=cl_args, link_args=link_args)
+    else:
+        builder = LinuxBuilder()
+        ret = builder.build(filenames, x64, 'src', 'out')
+    sys.exit(ret)
+
+
+@cli.command()
+@click.argument('filenames', nargs=-1, required=True,
+                type=click.Path(exists=True))
+@click.option('-6', '--x64', is_flag=True)
+@click.pass_context
+def linux(context, filenames, x64):
+    """
+    Linux Mode.
+    """
+    src = 'src'
+    bits = '64' if x64 else '32'
+    binary = 'sc' + bits
+    source = bits + '.c'
+    database = context.obj['database']
+    sources = read_files(filenames, with_name=True)
+    transformer = LinuxTransformer(database)
+    updated = transformer.transform_sources(sources)
+
+    os.makedirs(src, exist_ok=True)
+    write_files(updated, where=src)
+    builder = LinuxBuilder()
+    logging.info(_('Building transformed sources'))
+    builder.build(filenames, x64, 'src', binary)
+    logging.info(_('Dumpping compiled binary'))
+    logging.debug(_('Binary: %s Source: %s'), binary, source)
+    with open(binary, 'rb') as stream, \
+         open(source, 'w') as test:
+        logging.debug(_('transferring control to dump'))
+        context.invoke(dump, streams=[stream], output=test)
+    logging.info(_('Building dumpped source'))
+    builder.build([source], x64, '', bits)
+
+
+@cli.command()
+@click.argument('filenames', type=click.Path(exists=True),
+                nargs=-1, required=True)
+@click.option('-s', '--with-string', is_flag=True)
+@click.option('-6', '--x64', is_flag=True)
+@click.option('-n', '--native', is_flag=True)
+@click.option('-O', '--no-outputs', is_flag=True)
+@click.option('-m', '--make', is_flag=True)
+@click.option('-u', '--uri', help='Connect the RPC server.')
+@click.pass_context
+def transform(context, filenames, uri, with_string, native, x64,
+              make, no_outputs):
+    """Operate on C source files."""
+    logging.info(_('Entering transformation mode'))
+    src = 'src'
+    sense = context.obj['sense']
+    sources = read_files(filenames, with_name=True)
+
+    transformed, modules = WindowsTransformer(
+        sense).transform_sources(sources, with_string)
+    if no_outputs:
+        print('\n\n'.join(transformed.values()))
+    else:
+        if not os.path.exists(src):
+            os.makedirs(src)
+        write_files(stylify_files(transformed), where=src)
+
+    synthesized = Synthesizer(sense).synthesize(
+        modules, with_string, x64, native
+    )
+    if no_outputs:
+        print('\n\n'.join(synthesized.values()))
+    # else:
+    #     if not os.path.exists(src):
+    #         os.makedirs(src)
+    #     write_files(stylify_files(synthesized), where=src)
+
+    # if not make:
+    #     return
+    # shellcode = make_shellcode(filenames, with_string, x64, native)
+    # if not shellcode:
+    #     return 1
+    # shellcode = stylify_code(shellcode)
+    # if no_outputs:
+    #     print(shellcode)
+    # else:
+    #     parent_dir = get_parent_dir(filenames[0])
+    #     out_dir = os.path.join(parent_dir, 'bin')
+    #     if not os.path.exists(out_dir):
+    #         os.makedirs(out_dir)
+    #     test_name = '64.c' if x64 else '32.c'
+    #     test_name = os.path.join(parent_dir, test_name)
+    #     out_name = '64.exe' if x64 else '32.exe'
+    #     out_name = os.path.join(out_dir, out_name)
+    #     out_name = vboxsf_to_windows(out_name)
+    #     out_dir = vboxsf_to_windows(out_dir)
+    #     if write_file(test_name, shellcode):
+    #         link_args = ['/debug', '/out:' + out_name]
+    #         if msbuild(uri, [vboxsf_to_windows(test_name)],
+    #                    [], link_args, x64, out_dir):
+    #             print(_('Happy Hacking'))
+    #         else:
+    #             logging.error(_('failed to compile shellcode'))
+    sys.exit(0)
+
+
+@cli.command()
+@click.argument('keywords', nargs=-1)
+@click.option('-m', '--module', is_flag=True)
+@click.option('-r', '--raw', is_flag=True)
+@click.option('-k', '--kind', default=None)
+@click.pass_context
+def search(context, keywords, module, raw, kind):
+    """Query names and locations."""
+    logging.info(_('Entering search mode'))
+    sense = context.obj['sense']
+    func = sense.query_names if module else sense.query_info
+    for i in keywords:
+        print_if(func(i, raw, kind))
+    sys.exit(0)
+
+
+@cli.command()
+@click.argument('names', nargs=-1)
+@click.pass_context
+def winapi(context, names):
+    """Query Win32 API declarations.
+
+    You must prepare Windows database before using this.
+    """
+    logging.info(_('Entering search mode'))
+    sense = context.obj['sense']
+    for one in names:
+        print_if(stylify_code(sense.query_args(one)))
+    sys.exit(0)
+
+
+@cli.command()
+@click.argument('keywords', nargs=-1)
+@click.pass_context
+def kinds(context, keywords):
+    """Operate on IntelliSense kind ids and kind names.
+
+    Without an argument, list all available kinds and their ids.
+
+    You must prepare Windows database before using this.
+    """
+    logging.info(_('Entering kind mode'))
+    logging.debug('keywords: %s', keywords)
+    sense = context.obj['sense']
+    print(sense.query_kinds(keywords))
+    sys.exit(0)
+
+
+@cli.command()
+@click.argument('keywords', nargs=-1)
+@click.option('-m', '--module', is_flag=True)
+@click.option('-u', '--update', is_flag=True)
+@click.pass_context
+def export(context, keywords, module, update):
+    """Operate on libraries and exported functions.
+
+    You must fully prepare Windows database before using this.
+    """
+    logging.info(_('Entering export mode'))
+    sense = context.obj['sense']
+    if update:
+        exports = OrderedDict()
+        from .executables.pe import PE
+        for one in keywords:
+            module = split_ext(one, basename=True)[0]
+            with open(one, 'rb') as stream:
+                exports.update(
+                    {module: PE(stream).get_export_table()})
+        sense.make_export(exports)
+    else:
+        if module:
+            func = sense.query_module_funcs
+        else:
+            func = sense.query_func_module
+        for one in keywords:
+            output = func(one)
+            print_if(output)
+    sys.exit(0)
 
 
 @cli.command()
