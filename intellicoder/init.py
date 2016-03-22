@@ -24,8 +24,10 @@ import os
 
 from colorama import Fore, Style
 from pkg_resources import resource_filename
-from flufl.i18n import initialize
-from fn import _ as X
+try:
+    from flufl.i18n import initialize
+except ImportError:
+    pass
 
 
 __all__ = ['_', 'LevelFormatter']
@@ -34,8 +36,8 @@ __all__ = ['_', 'LevelFormatter']
 try:
     os.environ['LOCPATH'] = resource_filename(__name__, 'share')
     _ = initialize('intellicoder')
-except KeyError:
-    _ = X
+except (KeyError, NameError):
+    _ = lambda x: x
 
 
 def green(text, **kwargs):

@@ -8,3 +8,4 @@ sqlalchemy
 pyelftools
 pecoff
 python-magic
+plumbum
