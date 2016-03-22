@@ -42,9 +42,7 @@ from .utils import expand_path
               help='Connect the database.')
 @click.pass_context
 def cli(context, verbose, quiet, **kwargs):
-    """
-    IntelliCoder.
-    """
+    """IntelliCoder."""
     logger = logging.getLogger()
     handler = logging.StreamHandler(sys.stderr)
     handler.setFormatter(LevelFormatter())
