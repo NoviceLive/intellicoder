@@ -74,8 +74,7 @@ def cli(context, verbose, quiet, database, sense):
 @click.option('-6', '--x64', is_flag=True, help='Use x64.')
 @click.option('-n', '--native', is_flag=True, help='Use native.')
 def build(filenames, uri, cl_args, link_args, x64, native):
-    """
-    Build.
+    """Build (Don't use for the time being).
     """
     logging.info(_('This is source file building mode.'))
     logging.debug(_('filenames: %s'), filenames)
@@ -101,8 +100,7 @@ def build(filenames, uri, cl_args, link_args, x64, native):
 @click.option('-6', '--x64', is_flag=True)
 @click.pass_context
 def linux(context, filenames, x64):
-    """
-    Linux Mode.
+    """Linux (Don't use for the time being).
     """
     src = 'src'
     bits = '64' if x64 else '32'
@@ -120,12 +118,12 @@ def linux(context, filenames, x64):
     builder.build(filenames, x64, 'src', binary)
     logging.info(_('Dumpping compiled binary'))
     logging.debug(_('Binary: %s Source: %s'), binary, source)
-    with open(binary, 'rb') as stream, \
-         open(source, 'w') as test:
-        logging.debug(_('transferring control to dump'))
-        context.invoke(dump, streams=[stream], output=test)
-    logging.info(_('Building dumpped source'))
-    builder.build([source], x64, '', bits)
+    # with open(binary, 'rb') as stream, \
+    #      open(source, 'w') as test:
+    #     logging.debug(_('transferring control to dump'))
+    #     context.invoke(dump, streams=[stream], output=test)
+    # logging.info(_('Building dumpped source'))
+    # builder.build([source], x64, '', bits)
 
 
 @cli.command()
@@ -138,9 +136,10 @@ def linux(context, filenames, x64):
 @click.option('-m', '--make', is_flag=True)
 @click.option('-u', '--uri', help='Connect the RPC server.')
 @click.pass_context
-def transform(context, filenames, uri, with_string, native, x64,
+def tr(context, filenames, uri, with_string, native, x64,
               make, no_outputs):
-    """Operate on C source files."""
+    """Transform (Don't use for the time being).
+    """
     logging.info(_('Entering transformation mode'))
     src = 'src'
     sense = context.obj['sense']
@@ -201,7 +200,10 @@ def transform(context, filenames, uri, with_string, native, x64,
 @click.option('-k', '--kind', default=None)
 @click.pass_context
 def search(context, keywords, module, raw, kind):
-    """Query names and locations."""
+    """Query Windows identifiers and locations.
+
+    Windows database must be prepared before using this.
+    """
     logging.info(_('Entering search mode'))
     sense = context.obj['sense']
     func = sense.query_names if module else sense.query_info
@@ -216,7 +218,7 @@ def search(context, keywords, module, raw, kind):
 def winapi(context, names):
     """Query Win32 API declarations.
 
-    You must prepare Windows database before using this.
+    Windows database must be prepared before using this.
     """
     logging.info(_('Entering search mode'))
     sense = context.obj['sense']
@@ -229,11 +231,11 @@ def winapi(context, names):
 @click.argument('keywords', nargs=-1)
 @click.pass_context
 def kinds(context, keywords):
-    """Operate on IntelliSense kind ids and kind names.
+    """Operate on IntelliSense kind ids and names.
 
     Without an argument, list all available kinds and their ids.
 
-    You must prepare Windows database before using this.
+    Windows database must be prepared before using this.
     """
     logging.info(_('Entering kind mode'))
     logging.debug('keywords: %s', keywords)
@@ -250,7 +252,7 @@ def kinds(context, keywords):
 def export(context, keywords, module, update):
     """Operate on libraries and exported functions.
 
-    You must fully prepare Windows database before using this.
+    Windows database must be prepared before using this.
     """
     logging.info(_('Entering export mode'))
     sense = context.obj['sense']
@@ -281,7 +283,8 @@ def export(context, keywords, module, update):
 def add(context, filenames):
     """Add data on Linux system calls.
 
-    Arguments shall be *.tbl files or output from grep.
+    Arguments shall be *.tbl files from Linux x86 source code,
+    or output from grep.
 
     Delete the old database before adding if necessary.
     """
