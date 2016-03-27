@@ -1,7 +1,6 @@
 import os
 
 from intellicoder import Database
-from intellicoder.database import Item
 
 
 path = 'ignored'
@@ -18,9 +17,9 @@ try:
 except:
     pass
 db = Database(name)
-with open('tests/syscall_32.tbl') as tbl32, \
-     open('tests/syscall_64.tbl') as tbl64, \
-     open('tests/allsc.txt') as allsc:
+with open('tests/linux_db_test/syscall_32.tbl') as tbl32, \
+     open('tests/linux_db_test/syscall_64.tbl') as tbl64, \
+     open('tests/linux_db_test/allsc.txt') as allsc:
     db.add_data([tbl32, tbl64, allsc])
 
 

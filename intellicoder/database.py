@@ -47,6 +47,7 @@ class Database(object):
         self.session = Session()
 
     def query_item(self, key, abis):
+        """Query items based on system call number or name."""
         try:
             key = int(key)
             field = 'number'
@@ -61,16 +62,16 @@ class Database(object):
         return self.session.query(Item).filter(arg).all()
 
     def query_decl(self, **kwargs):
+        """Query declarations."""
         return self.session.query(Decl).filter_by(**kwargs).all()
 
     def add_data(self, filenames):
+        """Add data."""
         def _parse_table(table):
             def _parse_line(line):
                 return line.split('\t')
-            lines = (
-                _parse_line(one) for one in table.splitlines()
-                if re.match(r'^\d', one)
-            )
+            lines = (_parse_line(one) for one in table.splitlines()
+                     if re.match(r'^\d', one))
             return (remove_false(one) for one in lines)
 
         def _parse_decl(decl):
@@ -115,6 +116,7 @@ class Database(object):
 
 
 class Item(Base):
+    """Items in *.tbl files."""
     __tablename__ = 'items'
     item_id = Column(Integer, primary_key=True)
     name = Column(String, index=True)
@@ -131,6 +133,7 @@ class Item(Base):
 
 
 class Decl(Base):
+    """Declarations."""
     __tablename__ = 'decls'
     decl_id = Column(Integer, primary_key=True)
     name = Column(String, index=True)
