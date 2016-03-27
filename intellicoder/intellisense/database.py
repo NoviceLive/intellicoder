@@ -103,7 +103,12 @@ class IntelliSense(object):
     def query_info(self, name, like, kind):
         """Query the information of the name in the database."""
         kind = self._make_kind_id(kind)
-        sql = 'select name, kind, file_id, type, assoc_text ' \
+        # Database from VS2015 does not have assoc_text.
+        #
+        # sql = 'select name, kind, file_id, type, assoc_text ' \
+        #       'from code_items ' \
+        #       'where name {} ?'.format('like' if like else '=')
+        sql = 'select name, kind, file_id, type ' \
               'from code_items ' \
               'where name {} ?'.format('like' if like else '=')
         args = (name,)
@@ -256,14 +261,14 @@ class SenseWithExport(IntelliSense):
         if module:
             return (module[0], func)
         logging.debug(_('function not found: %s'), func)
-        func += 'A'
-        logging.debug('%s %s', sql, (func,))
-        self.cursor.execute(sql, (func,))
+        afunc = func + 'A'
+        logging.debug('%s %s', sql, (afunc,))
+        self.cursor.execute(sql, (afunc,))
         module = self.cursor.fetchone()
         if module:
-            logging.warning(_('using ANSI version: %s'), func)
-            return (module[0], func)
-        logging.warning(_('function not handled: %s'), func)
+            logging.warning(_('using ANSI version: %s'), afunc)
+            return (module[0], afunc)
+        logging.warning(_('Not handled: %s or %s'), func, afunc)
         return None
 
     @with_formatter(format_module_funcs)

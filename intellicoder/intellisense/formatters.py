@@ -21,6 +21,7 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division, absolute_import, print_function
 from logging import getLogger
 
+from ..init import _
 from ..sources import make_c_args
 
 
@@ -67,16 +68,15 @@ def format_info(raw):
     """Format a string representing the information
     concerning the name.
     """
-    sense = raw[1]
+    logging.debug(_('raw[0]: %s'), raw[0])
+    results, sense = raw
+    # A scenario where ORM really stands out.
     new = '\n'.join(
-        '{} {} {} {}{}'.format(
+        '{} {} {} {}'.format(
             i[0], sense.kind_id_to_name(i[1]),
             sense.file_id_to_name(i[2]).lower(),
-            i[3] + ' ' if i[3] else '',
-            i[4] if i[4] else '',
-        ).strip()
-        for i in raw[0]
-    )
+            i[3] + ' ' if i[3] else '').strip()
+        for i in results)
     return new
 
 

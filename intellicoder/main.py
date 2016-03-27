@@ -207,9 +207,15 @@ def search(context, keywords, module, raw, kind):
     logging.info(_('Entering search mode'))
     sense = context.obj['sense']
     func = sense.query_names if module else sense.query_info
-    for i in keywords:
-        print_if(func(i, raw, kind))
-    sys.exit(0)
+    none = True
+    for keyword in keywords:
+        output = func(keyword, raw, kind)
+        if output:
+            none = False
+            print(output)
+        else:
+            logging.warning(_('No results: %s'), keyword)
+    sys.exit(1 if none else 0)
 
 
 @cli.command()
@@ -220,11 +226,17 @@ def winapi(context, names):
 
     Windows database must be prepared before using this.
     """
-    logging.info(_('Entering search mode'))
+    logging.info(_('Entering winapi mode'))
     sense = context.obj['sense']
-    for one in names:
-        print_if(stylify_code(sense.query_args(one)))
-    sys.exit(0)
+    none = True
+    for name in names:
+        code = sense.query_args(name)
+        if code:
+            none = False
+            print(stylify_code(code))
+        else:
+            logging.warning(_('Function not found: %s'), name)
+    sys.exit(1 if none else 0)
 
 
 @cli.command()
@@ -259,21 +271,27 @@ def export(context, keywords, module, update):
     if update:
         exports = OrderedDict()
         from .executables.pe import PE
-        for one in keywords:
-            module = split_ext(one, basename=True)[0]
-            with open(one, 'rb') as stream:
+        for filename in keywords:
+            module = split_ext(filename, basename=True)[0]
+            with open(filename, 'rb') as stream:
                 exports.update(
                     {module: PE(stream).get_export_table()})
         sense.make_export(exports)
+        none = True
     else:
         if module:
             func = sense.query_module_funcs
         else:
             func = sense.query_func_module
-        for one in keywords:
-            output = func(one)
-            print_if(output)
-    sys.exit(0)
+        none = True
+        for keyword in keywords:
+            output = func(keyword)
+            if output:
+                none = False
+                print(output)
+            else:
+                logging.warning(_('No results: %s'), keyword)
+    sys.exit(1 if none else 0)
 
 
 @cli.command()
