@@ -47,14 +47,6 @@ def with_formatter(formatter):
     return _decorator_after_args
 
 
-def format_module_funcs(raw):
-    """Format the function names in a module."""
-    if raw:
-        return ' '.join(func[0] for func in raw)
-    else:
-        return None
-
-
 def format_func(raw):
     """Format a string representing the function prototype."""
     if raw:

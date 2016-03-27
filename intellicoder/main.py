@@ -258,16 +258,21 @@ def kinds(context, show_all, ids_or_names):
 
 @cli.command()
 @click.argument('keywords', nargs=-1)
-@click.option('-m', '--module', is_flag=True)
-@click.option('-u', '--update', is_flag=True)
+@click.option('-m', '--module', is_flag=True,
+              help='Query functions in the module.')
+@click.option('-u', '--update', is_flag=True,
+              help='Update database.')
 @click.pass_context
 def export(context, keywords, module, update):
     """Operate on libraries and exported functions.
 
+    Query the module name containing the function by default.
+
     Windows database must be prepared before using this.
     """
-    logging.info(_('Entering export mode'))
-    sense = context.obj['sense']
+    logging.info(_('Export Mode'))
+    database = context.obj['sense']
+    none = True
     if update:
         exports = OrderedDict()
         from .executables.pe import PE
@@ -276,21 +281,26 @@ def export(context, keywords, module, update):
             with open(filename, 'rb') as stream:
                 exports.update(
                     {module: PE(stream).get_export_table()})
-        sense.make_export(exports)
-        none = True
-    else:
-        if module:
-            func = sense.query_module_funcs
-        else:
-            func = sense.query_func_module
-        none = True
-        for keyword in keywords:
-            output = func(keyword)
-            if output:
+        database.make_export(exports)
+        none = False
+    elif module:
+        for module_name in keywords:
+            funcs = database.query_module_funcs(module_name)
+            if funcs:
                 none = False
-                print(output)
+                print(', '.join(map(str, funcs)))
             else:
-                logging.warning(_('No results: %s'), keyword)
+                logging.warning(_('No function for module: %s'),
+                                module_name)
+    else:
+        for func_name in keywords:
+            module_name = database.query_func_module(func_name)
+            if module_name:
+                none = False
+                print(repr(module_name))
+            else:
+                logging.warning(_('No module for function: %s'),
+                                func_name)
     sys.exit(1 if none else 0)
 
 

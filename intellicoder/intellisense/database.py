@@ -29,15 +29,33 @@ except ImportError:
     pass
 
 from ..init import _
-from ..utils import invert_dict
 from .sanitizers import sanitize_type, clean_ret_type
 from .formatters import (
     with_formatter, format_info, format_func, format_kinds,
-    format_names, format_comp, format_module_funcs
+    format_names, format_comp
 )
 
 
 logging = getLogger(__name__)
+
+
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy import Column, String, Integer
+
+
+Base = declarative_base()
+Session = sessionmaker()
+
+
+class Kind(Base):
+    __tablename__ = 'code_item_kinds'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+
+    def __repr__(self):
+        return '<Kind(id={0.id}, name={0.name})>'.format(self)
 
 
 class IntelliSense(object):
@@ -45,6 +63,9 @@ class IntelliSense(object):
     upon its database.
     """
     def __init__(self, database):
+        self.engine = create_engine('sqlite:///{}'.format(database))
+        Session.configure(bind=self.engine)
+        self.session = Session()
         self.database = database
         self.con = None
         self.cursor = None
@@ -167,6 +188,24 @@ class IntelliSense(object):
                 print(self.file_id_to_name(i[1]), i[2])
                 print(members)
 
+    def file_id_to_name(self, file_id):
+        """Convert a file id to the file name."""
+        sql = 'select name from files where id = ?'
+        logging.debug('%s %s', sql, (file_id,))
+        self.cursor.execute(sql, (file_id,))
+        name = self.cursor.fetchone()
+        if name:
+            return name[0]
+        return ''
+
+    def _make_kind_id(self, name_or_id):
+        """Make kind_id from kind_name or kind_id."""
+        if not name_or_id:
+            return None
+        if name_or_id.isdigit():
+            return name_or_id
+        return self.kind_name_to_id(name_or_id)
+
     @with_formatter(format_kinds)
     def query_kinds(self, kind):
         """Query kinds."""
@@ -189,24 +228,6 @@ class IntelliSense(object):
                 kind = None
         return [kind]
 
-    def file_id_to_name(self, file_id):
-        """Convert a file id to the file name."""
-        sql = 'select name from files where id = ?'
-        logging.debug('%s %s', sql, (file_id,))
-        self.cursor.execute(sql, (file_id,))
-        name = self.cursor.fetchone()
-        if name:
-            return name[0]
-        return ''
-
-    def _make_kind_id(self, name_or_id):
-        """Make kind_id from kind_name or kind_id."""
-        if not name_or_id:
-            return None
-        if name_or_id.isdigit():
-            return name_or_id
-        return self.kind_name_to_id(name_or_id)
-
     def kind_id_to_name(self, kind_id):
         """Convert a kind id to the kind name."""
         return self._kind_id_to_name.get(kind_id)
@@ -217,12 +238,26 @@ class IntelliSense(object):
 
     def _init_kind_converter(self):
         """Make a dictionary mapping kind ids to the names."""
-        sql = 'select id, name, parser from code_item_kinds'
-        logging.debug(sql)
-        self.cursor.execute(sql)
-        kinds = self.cursor.fetchall()
-        self._kind_id_to_name = {i[0]: i[1] for i in kinds}
+        from ..utils import invert_dict
+
+        kinds = self.session.query(Kind).all()
+        self._kind_id_to_name = {
+            kind.id: kind.name for kind in kinds
+        }
         self._kind_name_to_id = invert_dict(self._kind_id_to_name)
+
+
+class Export(Base):
+    __tablename__ = 'export'
+    func = Column(String, primary_key=True)
+    module = Column(String)
+
+    def __repr__(self):
+        base = '<(Export(func={0.func}, module={0.module}))>'
+        return base.format(self)
+
+    def __str__(self):
+        return self.func
 
 
 class SenseWithExport(IntelliSense):
@@ -251,38 +286,22 @@ class SenseWithExport(IntelliSense):
 
     def query_func_module(self, func):
         """Query the module name of the specified function."""
-        sql = 'select module from export where func = ?'
-        logging.debug('%s %s', sql, (func,))
-        try:
-            self.cursor.execute(sql, (func,))
-        except sqlite3.OperationalError:
-            logging.error(
-                _('Have you fully prepared Windows database?'))
-            return None
-        module = self.cursor.fetchone()
-        if module:
-            return (module[0], func)
-        logging.debug(_('function not found: %s'), func)
-        afunc = func + 'A'
-        logging.debug('%s %s', sql, (afunc,))
-        self.cursor.execute(sql, (afunc,))
-        module = self.cursor.fetchone()
-        if module:
-            logging.warning(_('using ANSI version: %s'), afunc)
-            return (module[0], afunc)
-        logging.warning(_('Not handled: %s or %s'), func, afunc)
+        exp = self.session.query(Export).filter_by(
+            func=func).first()
+        if exp:
+            return exp
+        logging.debug(_('Function not found: %s'), func)
+        alt = func + 'A'
+        exp = self.session.query(Export).filter_by(
+            func=alt).first()
+        if exp:
+            logging.warning(_('Using ANSI version: %s'), alt)
+            return exp
+        logging.warning(_('Not handled: %s or %s'), func, alt)
         return None
 
-    @with_formatter(format_module_funcs)
     def query_module_funcs(self, module):
         """Query the functions in the specified module."""
-        sql = 'select func from export where module = ?'
-        logging.debug('%s %s', sql, (module,))
-        try:
-            self.cursor.execute(sql, (module,))
-        except sqlite3.OperationalError:
-            logging.error(
-                _('Have you fully prepared Windows database?'))
-            return None
-        funcs = self.cursor.fetchall()
+        funcs = self.session.query(Export).filter_by(
+            module=module).all()
         return funcs
