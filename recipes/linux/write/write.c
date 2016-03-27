@@ -8,10 +8,10 @@
 int
 main(void)
 {
-  char message[] = "Hello World!\n";
-  write(STDOUT_FILENO, message, sizeof message);
+  /* char message[] = "Hello World!\n"; */
+  /* write(STDOUT_FILENO, message, sizeof message); */
 
-  // write(STDOUT_FILENO, "Hello World!\n", sizeof "Hello World!\n");
+  write(STDOUT_FILENO, "Hello World!\n", sizeof "Hello World!\n");
 
   return EXIT_SUCCESS;
 }

@@ -63,6 +63,7 @@ class Transformer(object):
         replaced = re.sub(
             self.STR_LITERAL_RE, self._string_replacer, replaced)
         return self._build_strings() + replaced
+        return replaced
 
 
 class WindowsTransformer(object):

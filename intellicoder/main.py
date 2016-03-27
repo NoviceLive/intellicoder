@@ -101,10 +101,11 @@ def build(filenames, uri, cl_args, link_args, x64, native):
 @click.pass_context
 def lin(context, filenames, x64):
     """Linux."""
+    logging.info(_('This is Linux Transformation mode.'))
     src = 'src'
     bits = '64' if x64 else '32'
-    binary = 'sc' + bits
-    source = bits + '.c'
+    binary = '_' + bits
+    shellcode = bits + '.bin'
     database = context.obj['database']
     sources = read_files(filenames, with_name=True)
     transformer = LinuxTransformer(database)
@@ -113,16 +114,12 @@ def lin(context, filenames, x64):
     os.makedirs(src, exist_ok=True)
     write_files(updated, where=src)
     builder = LinuxBuilder()
-    logging.info(_('Building transformed sources'))
+    logging.info(_('Compiling transformed sources'))
     builder.build(filenames, x64, 'src', binary)
-    logging.info(_('Dumpping compiled binary'))
-    logging.debug(_('Binary: %s Source: %s'), binary, source)
-    # with open(binary, 'rb') as stream, \
-    #      open(source, 'w') as test:
-    #     logging.debug(_('transferring control to dump'))
-    #     context.invoke(dump, streams=[stream], output=test)
-    # logging.info(_('Building dumpped source'))
-    # builder.build([source], x64, '', bits)
+    logging.info(_('Converting the compiled binary: %s'), binary)
+    logging.debug(_('Transferring control to conv'))
+    context.invoke(conv, arg=binary, source='sec', target='bin',
+                   filename=shellcode, section='.pic')
 
 
 @cli.command()
@@ -398,7 +395,7 @@ def conv(arg, source, target, filename, section):
     Supported executable formats:
     ELF via pyelftools and PE via pefile.
     """
-    logging.info(_('This is binary conversion mode.'))
+    logging.info(_('This is Binary Conversion mode.'))
     section = section.encode('utf-8')
     if source == 'sec':
         arg = open(arg, 'rb')

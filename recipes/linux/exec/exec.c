@@ -8,7 +8,8 @@
 int
 main(void)
 {
-  char bin[] = "/bin/sh";
-  execve(bin, NULL, NULL);
+  /* char bin[] = "/bin/sh"; */
+  /* execve(bin, NULL, NULL); */
+  execve("/bin/sh", NULL, NULL);
   return EXIT_SUCCESS;
 }

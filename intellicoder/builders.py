@@ -45,7 +45,7 @@ class Builder(object):
             another = os.path.join(os.path.dirname(one), 'syscall.c')
             logging.debug(_('Extra source: %s'), another)
             filenames.append(another)
-        logging.debug(_('Compiling files: %s'))
+        logging.debug(_('Compiling files: %s'), filenames)
         self._compile(filenames, x64, out)
         self._link()
 
@@ -53,9 +53,10 @@ class Builder(object):
 class LinuxBuilder(Builder):
     def _compile(self, filenames, x64, out):
         arch = '-m64' if x64 else '-m32'
-        include = expand_path('intellicoder', 'share', 'rawsc')
+        include = expand_path('static', 'syscall')
         logging.debug(_('Extra include: %s'), include)
-        gcc(arch, filenames, '-I', include, '-o', out, '-I', '.')
+        gcc(arch, filenames, '-static', '-fno-stack-protector', '-O3',
+            '-I', include, '-o', out, '-I', '.')
 
     def _link(self):
         ld('--version')
