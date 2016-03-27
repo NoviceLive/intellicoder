@@ -19,11 +19,11 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from __future__ import division, absolute_import, print_function
+from logging import getLogger
 import os
 import sys
 import string
 import platform
-from logging import getLogger
 from itertools import chain, groupby
 from subprocess import check_output, CalledProcessError
 from operator import itemgetter
@@ -235,27 +235,23 @@ def sort_item(iterable, number, reverse=False):
     return sorted(iterable, key=itemgetter(number), reverse=reverse)
 
 
-def print_if(value):
-    """Print when the argument is not False."""
-    if value:
-        print(value)
-
-
 def hash_func(name):
     """Hash the string using a hash algorithm found in
     tombkeeper/Shellcode_Template_in_C.
     """
     ret = 0
-    for i in name:
-        ret = ((ret << 5) + ret + ord(i)) & 0xffffffff
+    for char in name:
+        ret = ((ret << 5) + ret + ord(char)) & 0xffffffff
     return hex(ret)
 
 
 def remove_many(original, many):
     """Remove a list of items from the original list."""
     for one in many:
-        if one in original:
+        try:
             original.remove(one)
+        except ValueError:
+            pass
 
 
 def remove_dups(iterable):

@@ -19,9 +19,9 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from __future__ import division, absolute_import, print_function
+import logging
 import sys
 import os
-import logging
 from collections import OrderedDict
 
 import click
@@ -36,7 +36,7 @@ from .builders import LinuxBuilder
 from .synthesizers import Synthesizer
 from .utils import (
     expand_path, is_windows, write_file, read_files, write_files,
-    stylify_code, stylify_files, get_parent_dir, print_if, split_ext,
+    stylify_code, stylify_files, get_parent_dir, split_ext,
     vboxsf_to_windows)
 
 
@@ -136,10 +136,9 @@ def linux(context, filenames, x64):
 @click.option('-m', '--make', is_flag=True)
 @click.option('-u', '--uri', help='Connect the RPC server.')
 @click.pass_context
-def tr(context, filenames, uri, with_string, native, x64,
-              make, no_outputs):
-    """Transform (Don't use for the time being).
-    """
+def trans(context, filenames, uri, with_string, native, x64,
+          make, no_outputs):
+    """Transform (Don't use for the time being)."""
     logging.info(_('Entering transformation mode'))
     src = 'src'
     sense = context.obj['sense']
