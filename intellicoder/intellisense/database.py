@@ -168,24 +168,26 @@ class IntelliSense(object):
                 print(members)
 
     @with_formatter(format_kinds)
-    def query_kinds(self, raw_kinds):
+    def query_kinds(self, kind):
         """Query kinds."""
-        kinds = []
-        for kind in raw_kinds:
-            logging.debug(_('querying %s'), kind)
-            if kind.isdigit():
-                kind_name = self.kind_id_to_name(int(kind))
-                if kind_name:
-                    kinds.append((kind, kind_name))
-                else:
-                    logging.warning(_('id not found: %s'), kind)
+        logging.debug(_('querying %s'), kind)
+        if kind is None:
+            return self._kind_id_to_name.items()
+        if kind.isdigit():
+            kind_name = self.kind_id_to_name(int(kind))
+            if kind_name:
+                kind = (kind, kind_name)
             else:
-                kind_id = self.kind_name_to_id(kind)
-                if kind_id:
-                    kinds.append((kind_id, kind))
-                else:
-                    logging.warning(_('name not found: %s'), kind)
-        return kinds if kinds else self._kind_id_to_name.items()
+                logging.warning(_('id not found: %s'), kind)
+                kind = None
+        else:
+            kind_id = self.kind_name_to_id(kind)
+            if kind_id:
+                kind = (kind_id, kind)
+            else:
+                logging.warning(_('name not found: %s'), kind)
+                kind = None
+        return [kind]
 
     def file_id_to_name(self, file_id):
         """Convert a file id to the file name."""

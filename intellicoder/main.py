@@ -240,9 +240,11 @@ def winapi(context, names):
 
 
 @cli.command()
-@click.argument('keywords', nargs=-1)
+@click.argument('ids_or_names', nargs=-1)
+@click.option('-a', '--all', 'show_all', is_flag=True,
+              help='Show all kinds.')
 @click.pass_context
-def kinds(context, keywords):
+def kinds(context, show_all, ids_or_names):
     """Operate on IntelliSense kind ids and names.
 
     Without an argument, list all available kinds and their ids.
@@ -250,10 +252,19 @@ def kinds(context, keywords):
     Windows database must be prepared before using this.
     """
     logging.info(_('Entering kind mode'))
-    logging.debug('keywords: %s', keywords)
+    logging.debug('args: %s', ids_or_names)
     sense = context.obj['sense']
-    print(sense.query_kinds(keywords))
-    sys.exit(0)
+    none = True
+    if show_all:
+        none = False
+        print(sense.query_kinds(None))
+    else:
+        for id_or_name in ids_or_names:
+            id_name = sense.query_kinds(id_or_name)
+            if id_name:
+                none = False
+                print(id_name)
+    sys.exit(1 if none else 0)
 
 
 @cli.command()

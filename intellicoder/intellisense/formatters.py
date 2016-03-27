@@ -96,7 +96,8 @@ def format_names(raw):
 
 def format_kinds(raw):
     """Format a string representing the kinds."""
-    return ' '.join('{} {}'.format(*kind) for kind in raw)
+    output = ' '.join('{} {}'.format(*kind) for kind in raw if kind)
+    return output
 
 
 def format_comp(raw):
