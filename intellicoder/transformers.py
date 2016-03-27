@@ -26,7 +26,7 @@ from functools import partial
 from .init import _
 from .sources import (
     make_c_array_str, make_c_str, reloc_ptr, reloc_var, reloc_both,
-    EXTERN_AND_SEG, COMMON_FILES, HASH_FILE, STRING_FILE
+    EXTERN_AND_SEG
 )
 from .utils import remove_dups, sort_values
 
@@ -35,11 +35,12 @@ logging = getLogger(__name__)
 
 
 class Transformer(object):
-    func_name_re = r'[_\w][_\w\d]*(?=\s*\()'
+    """Source code transformation."""
+    FUNC_NAME_RE = r'[_\w][_\w\d]*(?=\s*\()'
     # No Good: r'(?<=").+?(?=")'
-    str_literal_re = r'".+?"'
-    func_name_prefix = 'ic_func_'
-    str_var_prefix = 'ic_str_'
+    STR_LITERAL_RE = r'".+?"'
+    FUNC_NAME_PREFIX = 'ic_func_'
+    STR_VAR_PREFIX = 'ic_str_'
     str_table = {}
     func_table = {}
 
@@ -58,87 +59,10 @@ class Transformer(object):
     def replace_source(self, body, name):
         logging.debug(_('Processing function body: %s'), name)
         replaced = re.sub(
-            self.func_name_re, self._func_replacer, body)
+            self.FUNC_NAME_RE, self._func_replacer, body)
         replaced = re.sub(
-            self.str_literal_re, self._string_replacer, replaced)
+            self.STR_LITERAL_RE, self._string_replacer, replaced)
         return self._build_strings() + replaced
-
-
-class LinuxTransformer(Transformer):
-    """
-    Linux Transformer.
-    """
-    main_foremost = """\
-# ifndef DECLARE
-# define DECLARE
-# endif /* DECLARE */
-
-# include "syscall.h"
-# include "syscall.c"
-
-
-int ATTR
-main(void);
-\n
-"""
-    source_foremost = """\
-# ifdef DECLARE
-# undef DECLARE
-# endif /* DECLARE */
-
-# include "syscall.h"
-\n
-"""
-
-    def _func_replacer(self, match):
-        matched = match.group(0)
-        logging.debug(_('Processing function name: %s'), matched)
-        items = self.database.query_decl(name=matched)
-        if items:
-            item = items[0]
-            logging.debug(_('item: %s'), item)
-            self.func_table.update({item.name: item})
-            return self.func_name_prefix + matched
-        else:
-            logging.warning(_('Function not handled: %s'), matched)
-            return matched
-
-    def _string_replacer(self, match):
-        matched = match.group()[1:-1]
-        logging.debug(_('Processing string literal: %s'), matched)
-        try:
-            number = self.str_table[matched]
-        except KeyError:
-            number = len(self.str_table) + 1
-            self.str_table.update({matched: number})
-        return self.str_var_prefix + str(number)
-
-    def _post_update(self, updated):
-        return self.main_foremost + updated
-
-    def _build_strings(self):
-        logging.debug(_('Using str_table: %s'), self.str_table)
-        strings = []
-        for value, number in sort_values(self.str_table):
-            var_name = self.str_var_prefix + str(number)
-            strings.append(make_c_array_str(var_name, value))
-        return '  ' + '  '.join(strings)
-
-    def _build_funcs(self):
-        logging.debug(_('Using func_table: %s'), self.func_table)
-        funcs = []
-        for name in sorted(self.func_table):
-            one = self.func_table[name]
-            if one.argc == 0:
-                decl = 'syscall{}(long, {})'.format(
-                    one.argc, one.name)
-            else:
-                decl = 'syscall{}(long, {}, {})'.format(
-                    one.argc, one.name,
-                    one.args.replace('__user ', '').replace(
-                        'umode_t', 'mode_t'))
-            funcs.append(decl)
-        return {'syscall.c': self.source_foremost + '\n'.join(funcs)}
 
 
 class WindowsTransformer(object):
@@ -162,11 +86,6 @@ class WindowsTransformer(object):
         for filename in sources:
             updated = update_func_body(sources[filename], updater)
             sources[filename] = EXTERN_AND_SEG + updated
-        sources.update(COMMON_FILES)
-        if with_string:
-            sources.update(STRING_FILE)
-        else:
-            sources.update(HASH_FILE)
         logging.debug('modules: %s', modules)
         return sources, self.build_funcs(modules)
 
@@ -270,6 +189,83 @@ class WindowsTransformer(object):
             ) for value, number in sort_values(strings)
         ]
         return [i[0] for i in strings], [i[1] for i in strings]
+
+
+class LinuxTransformer(Transformer):
+    """
+    Linux Transformer.
+    """
+    main_foremost = """\
+# ifndef DECLARE
+# define DECLARE
+# endif /* DECLARE */
+
+# include "syscall.h"
+# include "syscall.c"
+
+
+int ATTR
+main(void);
+\n
+"""
+    source_foremost = """\
+# ifdef DECLARE
+# undef DECLARE
+# endif /* DECLARE */
+
+# include "syscall.h"
+\n
+"""
+
+    def _func_replacer(self, match):
+        matched = match.group(0)
+        logging.debug(_('Processing function name: %s'), matched)
+        items = self.database.query_decl(name=matched)
+        if items:
+            item = items[0]
+            logging.debug(_('item: %s'), item)
+            self.func_table.update({item.name: item})
+            return self.FUNC_NAME_PREFIX + matched
+        else:
+            logging.warning(_('Function not handled: %s'), matched)
+            return matched
+
+    def _string_replacer(self, match):
+        matched = match.group()[1:-1]
+        logging.debug(_('Processing string literal: %s'), matched)
+        try:
+            number = self.str_table[matched]
+        except KeyError:
+            number = len(self.str_table) + 1
+            self.str_table.update({matched: number})
+        return self.STR_VAR_PREFIX + str(number)
+
+    def _post_update(self, updated):
+        return self.main_foremost + updated
+
+    def _build_strings(self):
+        logging.debug(_('Using str_table: %s'), self.str_table)
+        strings = []
+        for value, number in sort_values(self.str_table):
+            var_name = self.STR_VAR_PREFIX + str(number)
+            strings.append(make_c_array_str(var_name, value))
+        return '  ' + '  '.join(strings)
+
+    def _build_funcs(self):
+        logging.debug(_('Using func_table: %s'), self.func_table)
+        funcs = []
+        for name in sorted(self.func_table):
+            one = self.func_table[name]
+            if one.argc == 0:
+                decl = 'syscall{}(long, {})'.format(
+                    one.argc, one.name)
+            else:
+                decl = 'syscall{}(long, {}, {})'.format(
+                    one.argc, one.name,
+                    one.args.replace('__user ', '').replace(
+                        'umode_t', 'mode_t'))
+            funcs.append(decl)
+        return {'syscall.c': self.source_foremost + '\n'.join(funcs)}
 
 
 def update_func_body(original, updater=None):

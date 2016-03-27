@@ -22,17 +22,16 @@ from __future__ import division, absolute_import, print_function
 from logging import getLogger
 import string
 from collections import namedtuple
-from configparser import ConfigParser
 
+from .init import _
 from .sources import (
-    make_c_args, make_c_str, reloc_ptr, reloc_var,
-    make_c_header, make_init, reloc_both, make_windll
+    make_c_args, make_c_str, reloc_ptr, reloc_var, make_c_header,
+    make_init, reloc_both, make_windll
 )
 from .utils import (
-    AttrsGetter, expand_user, group_by, hash_func,
-    ends_with_punctuation, stylify_files
+    AttrsGetter, expand_user, group_by, hash_func, stylify_files,
+    ends_with_punctuation
 )
-from .init import _
 
 
 logging = getLogger(__name__)
@@ -43,11 +42,6 @@ class Synthesizer(object):
     def __init__(self, database):
         self.database = database
         self.generic = True
-        filename = expand_user('.intellicoder', 'code.conf')
-        logging.debug(_('Reading configuration file: %s'), filename)
-        conf = ConfigParser()
-        conf.read(filename)
-        print(conf['code']['base'])
 
     def synthesize(self, modules, use_string, x64, native):
         """Transform sources."""
@@ -116,7 +110,11 @@ class Synthesizer(object):
 
 
 class ModuleSource(object):
-    """Represent a module with its functions and code options."""
+    """Represent a module with its functions and code options.
+
+    name: module name like 'user32', 'kernel32', 'ntdll' and so on.
+    funcs:
+    """
     def __init__(self, name, funcs=None, opts=None):
         self.name = name.lower()
         if funcs is None:

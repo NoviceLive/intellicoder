@@ -190,23 +190,3 @@ extern windll_t _windll;
 # pragma code_seg(".pic")
 # pragma data_seg(".pid")
 """.strip() + '\n\n'
-
-
-COMMON_FILES = {
-    'common.h': """
-""".strip(),
-    'structs.h': """
-""".strip()
-}
-
-
-HASH_FILE = {
-    'hash.c': """
-""".strip()
-}
-
-
-STRING_FILE = {
-    'string.h': """
-""".strip()
-}

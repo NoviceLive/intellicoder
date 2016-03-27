@@ -99,9 +99,8 @@ def build(filenames, uri, cl_args, link_args, x64, native):
                 type=click.Path(exists=True))
 @click.option('-6', '--x64', is_flag=True)
 @click.pass_context
-def linux(context, filenames, x64):
-    """Linux (Don't use for the time being).
-    """
+def lin(context, filenames, x64):
+    """Linux."""
     src = 'src'
     bits = '64' if x64 else '32'
     binary = 'sc' + bits
@@ -129,35 +128,26 @@ def linux(context, filenames, x64):
 @cli.command()
 @click.argument('filenames', type=click.Path(exists=True),
                 nargs=-1, required=True)
-@click.option('-s', '--with-string', is_flag=True)
+@click.option('-s', '--string', 'use_string', is_flag=True)
 @click.option('-6', '--x64', is_flag=True)
 @click.option('-n', '--native', is_flag=True)
-@click.option('-O', '--no-outputs', is_flag=True)
-@click.option('-m', '--make', is_flag=True)
-@click.option('-u', '--uri', help='Connect the RPC server.')
 @click.pass_context
-def trans(context, filenames, uri, with_string, native, x64,
-          make, no_outputs):
-    """Transform (Don't use for the time being)."""
-    logging.info(_('Entering transformation mode'))
+def win(context, filenames, use_string, native, x64):
+    """Windows."""
+    logging.info(_('windows mode'))
     src = 'src'
-    sense = context.obj['sense']
+    database = context.obj['sense']
     sources = read_files(filenames, with_name=True)
 
-    transformed, modules = WindowsTransformer(
-        sense).transform_sources(sources, with_string)
-    if no_outputs:
-        print('\n\n'.join(transformed.values()))
-    else:
-        if not os.path.exists(src):
-            os.makedirs(src)
-        write_files(stylify_files(transformed), where=src)
+    transformer = WindowsTransformer(database)
+    transformed, modules = transformer.transform_sources(
+        sources, use_string)
+    if not os.path.exists(src):
+        os.makedirs(src)
+    write_files(stylify_files(transformed), where=src)
 
-    synthesized = Synthesizer(sense).synthesize(
-        modules, with_string, x64, native
-    )
-    if no_outputs:
-        print('\n\n'.join(synthesized.values()))
+    # synthesized = Synthesizer(database).synthesize(
+    #     modules, use_string, x64, native)
     # else:
     #     if not os.path.exists(src):
     #         os.makedirs(src)
