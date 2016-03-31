@@ -3,7 +3,11 @@ IntelliCoder
 
 Position independent programming for humans.
 
-Current State: It's a pretotype.
+Or seriously, automation of position independent code generation
+from normal C source code.
+
+Current State: It's a pretotype or a toy
+serving educational purposes.
 
 
 .. image:: https://travis-ci.org/NoviceLive/intellicoder.svg?branch=master
@@ -62,3 +66,57 @@ Examples
    munmap common 11
    long munmap(unsigned long addr,  size_t len); /* mm/nommu.c */
    long munmap(unsigned long addr,  size_t len); /* mm/mmap.c */
+
+
+Directory Structure
+===================
+
+intellicoder/
+-------------
+
+intellicoder/executables/
++++++++++++++++++++++++++
+
+A simple abstraction layer of binary executables
+based on existing predominant libraries such as pyelftools_.
+
+Note that it's incomplete and ad-hoc for the time being.
+
+intellicoder/msbuild/
++++++++++++++++++++++
+
+Despite its name, ``intellicoder.msbuild`` does not wrap MSBuild_.
+
+Instead, it wraps against MSVC_ with SDKs_ (and WDKs_) to ease
+the automation of compilation on Windows.
+
+intellicoder/intellisense/
+++++++++++++++++++++++++++
+
+Collect necessary information, e.g., function prototypes,
+, leveraging the database of IntelliSense_.
+
+
+static/
+-------
+
+C library sources and headers.
+
+These are licensed under `GNU Lesser General Public License`_.
+
+
+recipes/
+--------
+
+Examples.
+
+Note thta some are work in progress and may not work as intended.
+
+
+.. _pyelftools: https://github.com/eliben/pyelftools
+.. _MSBuild: https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx
+.. _MSVC: https://msdn.microsoft.com/en-us/library/hh875057.aspx
+.. _SDKs: https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk
+.. _WDKs: https://msdn.microsoft.com/en-us/library/windows/hardware/ff557573%28v=vs.85%29.aspx
+.. _IntelliSense: https://msdn.microsoft.com/en-us/library/hcw1s69b.aspx
+.. _GNU Lesser General Public License: http://www.gnu.org/licenses/lgpl.html
