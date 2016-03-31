@@ -28,6 +28,43 @@ Usable Features
 ===============
 
 
+Usage
+-----
+
+See ``./ic.py --help``.
+
+Note that some commands are not usable and
+some may change without notification.
+
+::
+
+   ./ic.py --help
+   Usage: ic.py [OPTIONS] COMMAND [ARGS]...
+
+     Position Independent Programming For Humans.
+
+   Options:
+     -V, --version        Show the version and exit.
+     -v, --verbose        Be verbose.
+     -q, --quiet          Be quiet.
+     -d, --database PATH  Connect the database.
+     -s, --sense PATH     Connect the IntelliSense database.
+     -h, --help           Show this message and exit.
+
+   Commands:
+     add     Add data on Linux system calls.
+     build   Build (Don't use for the time being).
+     conv    Convert binary.
+     export  Operate on libraries and exported functions.
+     info    Find in the Linux system calls.
+     kinds   Operate on IntelliSense kind ids and names.
+     lin     Linux.
+     make    Make binaries from sources.
+     search  Query Windows identifiers and locations.
+     win     Windows.
+     winapi  Query Win32 API declarations.
+
+
 Shellcode Extraction & Conversion
 ---------------------------------
 
@@ -117,7 +154,7 @@ Copying Conditions
 ==================
 
 Unless otherwise specified, IntelliCoder is licensed under
-_`GNU General Public License`.
+`GNU General Public License`_.
 
 
 .. _pyelftools: https://github.com/eliben/pyelftools
