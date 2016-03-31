@@ -94,7 +94,7 @@ intellicoder/intellisense/
 ++++++++++++++++++++++++++
 
 Collect necessary information, e.g., function prototypes,
-, leveraging the database of IntelliSense_.
+leveraging the database of IntelliSense_.
 
 
 static/
@@ -113,6 +113,13 @@ Examples.
 Note thta some are work in progress and may not work as intended.
 
 
+Copying Conditions
+==================
+
+Unless otherwise specified, IntelliCoder is licensed under
+_`GNU General Public License`.
+
+
 .. _pyelftools: https://github.com/eliben/pyelftools
 .. _MSBuild: https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx
 .. _MSVC: https://msdn.microsoft.com/en-us/library/hh875057.aspx
@@ -120,3 +127,4 @@ Note thta some are work in progress and may not work as intended.
 .. _WDKs: https://msdn.microsoft.com/en-us/library/windows/hardware/ff557573%28v=vs.85%29.aspx
 .. _IntelliSense: https://msdn.microsoft.com/en-us/library/hcw1s69b.aspx
 .. _GNU Lesser General Public License: http://www.gnu.org/licenses/lgpl.html
+.. _GNU General Public License: http://www.gnu.org/licenses/gpl.html
