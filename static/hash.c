@@ -1,15 +1,16 @@
 /*
  * Copyright 2015-2016 Gu Zhengxiong <rectigu@gmail.com>
  *
- * LGPL.
+ * Licensed under GNU Lesser General Public License.
+ * See COPYING.LIB.txt.
  */
 
 
-# ifndef PREPROCESS
+# ifndef CPP
 # include <stdint.h>
 
 # include <windows.h>
-# endif
+# endif /* CPP */
 
 # include "structs.h"
 
@@ -26,6 +27,9 @@ uint32_t hash_func(char *string)
 }
 
 
+/* No ``__forceinline`` here
+ * because we are going to use it many times.
+ */
 FARPROC
 get_proc_by_hash(HMODULE base, uint32_t proc_hash)
 {

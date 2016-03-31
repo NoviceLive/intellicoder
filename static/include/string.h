@@ -1,7 +1,8 @@
 /*
  * Copyright 2015-2016 Gu Zhengxiong <rectigu@gmail.com>
  *
- * LGPL.
+ * Licensed under GNU Lesser General Public License.
+ * See COPYING.LIB.txt.
  */
 
 
@@ -9,6 +10,9 @@
 # define _GU_ZHENGXIONG_STRING_H
 
 
+/* ``__forceinline`` here
+ * because we will use it only once.
+ */
 __forceinline
 FARPROC
 get_proc_by_string(HMODULE base, char *proc_string)
@@ -29,6 +33,13 @@ get_proc_by_string(HMODULE base, char *proc_string)
     ((uintptr_t)base + export_directory->AddressOfNames);
   for (i = 0; i < export_directory->NumberOfNames; ++i) {
     char *name = (char *)((uintptr_t)base + name_table[i]);
+    /* Use /Oi for inlined intrinsic function ``strcmp``.
+     * See ``Intrinsics Available on All Architectures``,
+     * https://msdn.microsoft.com/en-us/library/5704bbxw.aspx, and
+     * ``/Oi (Generate Intrinsic Functions)``,
+     * https://msdn.microsoft.com/en-us/library/f99tchzc.aspx,
+     * for more information.
+     */
     if (strcmp(name, proc_string) == 0) {
 # ifdef DEBUG
       __debugbreak();

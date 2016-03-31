@@ -1,16 +1,17 @@
 /*
  * Copyright 2015-2016 Gu Zhengxiong <rectigu@gmail.com>
  *
- * LGPL.
+ * Licensed under GNU Lesser General Public License.
+ * See COPYING.LIB.txt.
  */
 
 
 # ifndef _GU_ZHENGXIONG_STRUCTS_H
 # define _GU_ZHENGXIONG_STRUCTS_H
 
-# ifndef PREPROCESS
+# ifndef CPP
 # include <windows.h>
-# endif
+# endif /* CPP */
 
 
 typedef
@@ -32,7 +33,7 @@ struct _LDR_DATA_TABLE_ENTRY {
   ULONG SizeOfImage;
   UNICODE_STRING FullDllName;
   UNICODE_STRING BaseDllName;
-  /* We don't need them. */
+  /* They are not required. */
 }
 LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
 
@@ -71,7 +72,7 @@ struct _PEB {
   VOID *Mutant;
   VOID *ImageBaseAddress;
   PEB_LDR_DATA *Ldr;
-  /* We don't need them. */
+  /* They are not required. */
 }
 PEB, *PPEB;
 

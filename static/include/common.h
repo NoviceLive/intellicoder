@@ -1,7 +1,8 @@
 /*
  * Copyright 2015-2016 Gu Zhengxiong <rectigu@gmail.com>
  *
- * LGPL.
+ * Licensed under GNU Lesser General Public License.
+ * See COPYING.LIB.txt.
  */
 
 
@@ -9,11 +10,11 @@
 # define _GU_ZHENGXIONG_COMMON_H
 
 
-# ifndef PREPROCESS
+# ifndef CPP
 # include <stdint.h>
 
 # include <windows.h>
-# endif
+# endif /* CPP */
 # include "structs.h"
 
 
