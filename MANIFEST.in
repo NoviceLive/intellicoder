@@ -1,0 +1,12 @@
+include COPYING.txt
+include COPYING.LIB.txt
+include requirements.txt
+
+
+graft static
+graft data
+graft scripts
+graft tests
+
+
+graft recipes
