@@ -1,7 +1,7 @@
 IntelliCoder
 ============
 
-Position independent programming for humans.
+Position independent programming for humans. (WIP.)
 
 Or seriously, automation of position independent code generation
 from normal C source code.

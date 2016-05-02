@@ -62,7 +62,10 @@ def cli(context, verbose, quiet, database, sense):
     logger.setLevel(logging.WARNING + (quiet-verbose)*10)
     logging.debug(_('Subcommand: %s'), context.invoked_subcommand)
     context.obj['database'] = Database(database)
-    context.obj['sense'] = SenseWithExport(sense).__enter__()
+    try:
+        context.obj['sense'] = SenseWithExport(sense).__enter__()
+    except Exception:
+        pass
 
 
 @cli.command()
