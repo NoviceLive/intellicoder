@@ -28,18 +28,24 @@ __version__ = '0.5.0'
 
 
 PROGRAM_NAME = 'IntelliCoder'
-PACKAGE_NAME = 'intellicoder'
+PACKAGE_NAME = PROGRAM_NAME.lower()
 
 
-with open('requirements.txt') as deps:
-    common_deps = deps.read().splitlines()
+my_dir = dirname(argv[0])
+version_file = 'version.txt'
+version_path = join(my_dir, PACKAGE_NAME, version_file)
+with open(version_path) as stream:
+    __version__ = stream.read().strip()
+
+with open(join(my_dir, 'requirements.txt')) as stream:
+    requirements = stream.read().splitlines()
 
 
 setup(
     name=PROGRAM_NAME,
     version=__version__,
     packages=find_packages(),
-    install_requires=common_deps,
+    install_requires=requirements,
     include_package_data=True,
     entry_points={
         'console_scripts': [
