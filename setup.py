@@ -54,7 +54,7 @@ setup(
             'ic={}.main:main'.format(PACKAGE_NAME)
         ]
     },
-    package_data={'intellicoder': 'linux.db', 'windows.db'},
+    package_data={'intellicoder': ['linux.db', 'windows.db']},
     author=__author__,
     author_email='rectigu@gmail.com',
     description='Shellcoding Helper',
