@@ -25,13 +25,10 @@ from os.path import dirname, join
 from setuptools import setup, find_packages
 
 
-__author__ = 'Gu Zhengxiong'
-__version__ = '0.5.0'
-
-
 PROGRAM_NAME = 'IntelliCoder'
 PACKAGE_NAME = PROGRAM_NAME.lower()
 
+__author__ = 'Gu Zhengxiong'
 
 my_dir = dirname(argv[0])
 version_file = 'version.txt'
@@ -47,14 +44,15 @@ setup(
     name=PROGRAM_NAME,
     version=__version__,
     packages=find_packages(),
+    package_data={
+        'intellicoder': [version_file, 'linux.db', 'windows.db']
+    },
     install_requires=requirements,
-    include_package_data=True,
     entry_points={
         'console_scripts': [
             'ic={}.main:main'.format(PACKAGE_NAME)
         ]
     },
-    package_data={'intellicoder': ['linux.db', 'windows.db']},
     author=__author__,
     author_email='rectigu@gmail.com',
     description='Shellcoding Helper',
