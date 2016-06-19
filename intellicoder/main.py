@@ -25,6 +25,7 @@ import os
 from collections import OrderedDict
 
 import click
+from pkg_resources import resource_filename
 
 from . import VERSION_PROMPT, PROGRAM_NAME
 from .init import _, LevelFormatter
@@ -47,10 +48,10 @@ from .utils import (
 @click.option('-v', '--verbose', count=True, help='Be verbose.')
 @click.option('-q', '--quiet', count=True, help='Be quiet.')
 @click.option('-d', '--database', type=click.Path(),
-              default=expand_path('data', 'default.db'),
+              default=resource_filename(__name__, 'linux.db'),
               help='Connect the database.')
 @click.option('-s', '--sense', type=click.Path(),
-              default=expand_path('ignored', 'default.db'),
+              default=resource_filename(__name__, 'windows.db'),
               help='Connect the IntelliSense database.')
 @click.pass_context
 def cli(context, verbose, quiet, database, sense):
@@ -386,7 +387,7 @@ def info(context, keywords, x86, x64, x32, common):
               help='Convert to this form.')
 @click.option('-o', '--output', 'filename',
               help='Write to a file (print to stdout by default).')
-@click.option('-j', '--section', default='.pic', show_default=True,
+@click.option('-j', '--section', default='.text', show_default=True,
               help='Use this section.')
 def conv(arg, source, target, filename, section):
     """Convert binary.

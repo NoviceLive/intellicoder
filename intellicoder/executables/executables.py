@@ -44,6 +44,7 @@ class Executable(object):
         logging.debug(_('MIME type: %s'), self.mime)
 
         if self.mime in [
+                b'application/x-object',
                 b'application/x-executable',
                 b'application/x-sharedlib']:
             self.binary = ELF(stream)

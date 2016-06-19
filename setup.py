@@ -19,6 +19,8 @@ along with IntelliCoder.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from __future__ import division, absolute_import, print_function
+from sys import argv
+from os.path import dirname, join
 
 from setuptools import setup, find_packages
 
@@ -52,11 +54,12 @@ setup(
             'ic={}.main:main'.format(PACKAGE_NAME)
         ]
     },
+    package_data={'intellicoder': 'linux.db', 'windows.db'},
     author=__author__,
     author_email='rectigu@gmail.com',
-    description='Shellcoder',
+    description='Shellcoding Helper',
     license='GPL',
-    keywords='Shellcoder',
+    keywords='Shellcode, Binary',
     url='https://github.com/NoviceLive/{}'.format(PACKAGE_NAME),
 
     classifiers=[

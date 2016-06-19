@@ -6,6 +6,6 @@ more-itertools
 fn
 sqlalchemy
 pyelftools
-pecoff
+pefile
 python-magic
 plumbum
